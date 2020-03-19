@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html class="app">
+<head>
+	<title>Authorize</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="manifest" href="/manifest.json" crossorigin="anonymous">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta name="apple-mobile-web-app-title" content="Authenticator">
+	<!-- <meta name="apple-mobile-web-app-capable" content="yes" /> -->
+	<!-- <meta name="apple-mobile-web-app-status-bar-style" content="black" /> -->
+	<link rel='apple-touch-icon' href='/img/logo/favicon-76x76.png' />
+	<link rel='apple-touch-icon' sizes='76x76' href='/img/logo/favicon-76x76.png' />
+	<link rel='apple-touch-icon' sizes='120x120' href='/img/logo/favicon-120x120.png' />
+	<link rel='apple-touch-icon' sizes='152x152' href='/img/logo/favicon-152x152.png' />
+	<link rel='apple-touch-icon' sizes='180x180' href='/img/logo/favicon-180x180.png' />
+	<link rel='apple-touch-icon' sizes='167x167' href='/img/logo/favicon-167x167.png' />
+	<link rel='apple-touch-startup-image' href='/img/logo/favicon-920x680.png' />
+
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<meta name="robots" content="noindex, nofollow">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="theme-color" content="#000000">
+
+	<link rel="stylesheet" href="/lib/css/icon.css" />
+	<link rel="stylesheet" href="/lib/css/aim.css" />
+	<script type="text/javascript" charset="UTF-8" src="/api/js?local=api&auth"></script>
+	<script type="text/javascript" charset="UTF-8" src="/lib/js/aim.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="/lib/js/app.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="/lib/js/lib/qrcode.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="/lib/js/lib/qrscan.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="/js/authorize.js"></script>
+</head>
+<body class="auth">
+	<div class="slidein-panel shdw" method="post" id="colpanel" autocomplete="off" >
+		<img class="logo" src="/shared/aliconnect/logo.png">
+	</form>
+	<canvas id="canvas" hidden></canvas>
+	<div id="divExtra"></div>
+	<div id="rowinfo"><span>©2019 AliConnect</span><a href="#" tabindex="-1">Gebruiksrechtovereenkomst</a><a href="#" tabindex="-1">Privacy en cookies</a></div>
+</body>
+</html>
