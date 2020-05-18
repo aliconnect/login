@@ -1,5 +1,7 @@
 AIM.extend({
 	checkResponse: function(event) {
+		event.preventDefault();
+		console.log('checkResponse', this);
 		if (event.status >= 400) return this.showError(this.responses && this.responses[event.status] ? this.responses[event.status].description : __('Response error %s %s', event.status, event.statusText) );
 		if (!event.data) return;
 		AIM.responseData = event.data;
@@ -40,40 +42,44 @@ AIM.extend({
 		},
 		login: {
 			show: function () {
-				console.log(screen.width);
+				console.log(screen.width, AIM.config);
 				let minAppWidth = 400;
-				(this.el = this.el || colpanel.appendTag('form',{className:'col aco '})).appendForm({
-					title: 'Login',
-					// description: `` + (AIM.cookie.id_token ? JSON.parse(atob(AIM.cookie.id_token.split('.')[1])).name  : ''),
-					properties: [
-						// AIM.cookie.id_token ? null : { name: 'accountname', type:'text', autocomplete:'username', required:true, autofocus:true, title: 'Email address or phone number' },
-						// AIM.cookie.id_token ? null : { name: 'loginpassword', type:'password', autocomplete:'off', title: 'Password' },
-						!AIM.cookie.id_token || screen.width > minAppWidth ? { name: 'accountname', type:'text', autocomplete:'username', required:true, autofocus:true, title: 'Email address or phone number' } : null,
-						!AIM.cookie.id_token || screen.width > minAppWidth ? { name: 'loginpassword', type:'password', autocomplete:'off', title: 'Password' } : null,
-						screen.width < minAppWidth && !AIM.cookie.id_token ? null : { tagName: 'button', type:'button', id: 'el_cam', innerText:'CAM', className:'cam', onclick: AIM.cam.start },
-						screen.width > minAppWidth ? { tagName: 'div', id: 'authcode' } : null,
-					],
-					hyperlinks: [
-						screen.width < minAppWidth && AIM.cookie.id_token ? null : { innerText: 'No account?', label: 'Create account now', href: '#?prompt=add_account' },
-						screen.width > minAppWidth ? { label: 'Login options', href: '#?prompt=login_options' } : null,
-						// { label: 'Logout_now', href: '#?logout' },
-						screen.width > minAppWidth ? { label: 'Developers', href: 'https://aliconnect.nl/lib/docs/#/Docs/Start' } : null,
-						AIM.cookie.id_token ? {label: __('Logout_now', JSON.parse(atob(AIM.cookie.id_token.split('.')[1])).name), href: '#?prompt=logout'} : null,
-					],
-					operations: [
+				this.el = this.el || colpanel.appendTag(
+					'FORM',
+					['H1','Login'],
+					// AIM.cookie.id_token ? null : { name: 'accountname', type:'text', autocomplete:'username', required:true, autofocus:true, title: 'Email address or phone number' },
+					// AIM.cookie.id_token ? null : { name: 'loginpassword', type:'password', autocomplete:'off', title: 'Password' },
+					!AIM.cookie.id_token || screen.width > minAppWidth ? ['INPUT', { format:'text', label: 'Email address or phone number', type:'text', name: 'accountname', autocomplete:'username', autofocus:true, required:true, autofocus:true }] : null,
+					!AIM.cookie.id_token || screen.width > minAppWidth ? ['INPUT', { format:'text', label: 'Password', type:'password', name: 'loginpassword', autocomplete:'off', style:'display1:none;' }] : null,
+					screen.width < minAppWidth && !AIM.cookie.id_token ? null : ['BUTTON', 'CAM', { type:'button', id: 'el_cam', className:'cam', onclick: AIM.cam.start }],
+					screen.width > minAppWidth ? ['DIV', { id: 'authcode' }] : null,
+
+					screen.width < minAppWidth && AIM.cookie.id_token ? null : ['DIV', ['SPAN', 'No account?'], ['A', 'Create account now', { href: '#?prompt=add_account' }]],
+					screen.width > minAppWidth ? ['DIV', ['A', 'Login options', { href: '#?prompt=login_options' }]] : null,
+					// { label: 'Logout_now', href: '#?logout' },
+					screen.width > minAppWidth ? ['DIV', ['A', 'Developers', { href: 'https://aliconnect.nl/lib/docs/#/Docs/Start' }]] : null,
+					AIM.cookie.id_token ? ['DIV', ['A', __('Logout_now', JSON.parse(atob(AIM.cookie.id_token.split('.')[1])).name), { href: '#?prompt=logout'}]] : null,
+					[
+						'DIV',{className: 'row btns'},
 						// { type:'button', label: 'Cancel', value: 'changepassword', onclick: function() {AIM.request('?prompt=login');} },
-						!AIM.cookie.id_token || screen.width > minAppWidth ? { type:'submit', default: true, label: 'Next' } : null,
+						!AIM.cookie.id_token || screen.width > minAppWidth ? ['DIV', ['BUTTON', 'Next', { className: 'abtn icn', type:'submit', default: true }]] : null,
 					],
-					onload : function (event) {
-						// console.log(event);
+					{
+						className: 'col aco ',
+						req: AIM.config.oauth2.url + document.location.search,
+					},
+					function (event) {
+						console.log('LOGIN',event);
 						this.responses = {
 							200: {description: 'successful operation' },
 							404: {description: __('Email or phonenumber not found', this.accountname.value) },
 						};
 						AIM.checkResponse.call(this,event);
 					}
-				});
-				if (document.getElementById('authcode')) new QRCode('authcode', { text: AIM.ws.sid, width: 140, height: 140 });
+				);
+				if (document.getElementById('authcode')) {
+					new QRCode('authcode', { text: AIM.ws.sid, width: 140, height: 140 });
+				}
 				// if (AIM.cookie.id_token) document.getElementById("el_cam").onclick = AIM.video.start;
 			},
 		},
@@ -667,59 +673,6 @@ AIM.extend({
 		},
 	},
 	on: {
-		// message: function (event) {
-		// 	// console.log('auth message', event.data);
-		// 	AIM.ws.responseData = event.data;
-		// 	//var elMsg = document.getElementById('divExtra');
-		// 	//console.log('auth message state', data.state);
-		// 	//if (document.getElementById(data.state)) auth.prompt(data.state);
-		// 	// AIM.request(data);
-		// 	// if (data.path) AIM.req ()auth.openprompt(data.prompt);
-		//
-		// 	// switch (data.state) {
-		// 	// 	case 'reload':
-		// 	// 		document.location.reload();
-		// 	// 		break;
-		// 	// 	case 'scanned':
-		// 	// 		console.log('auth message state', data.state, data.id_token);
-		// 	//
-		// 	//
-		// 	//
-		// 	// 		//document.getElementById('UserName').value = data.user.userName;
-		// 	// 		console.log('auth message state', event);
-		// 	//
-		// 	// 		AIM.ws.request({ to: { sid: data.from.sid }, state: 'allowrequestfordata' });
-		// 	// 		//AIM.ws.request({ to: { client: get.client }, state: 'allowrequestfordata', description: 'Code is gescanned, verzoek om acceptatie' });
-		// 	//
-		// 	// 		//console.log('auth message state', data.state);
-		// 	// 		break;
-		// 	// 	case 'allowrequestfordata':
-		// 	// 		elMsg.innerText = 'Request for data';
-		// 	// 		document.getElementById("canvas").style.display = 'none';
-		// 	// 		video.style.display = 'none';
-		// 	// 		AIM.ws.request({ to: { client: data.from.client }, state: 'waitforallow' });
-		// 	// 		btnLogout.style.display = btnNext.style.display = 'none';
-		// 	// 		btnDeny.style.display = btnAllow.style.display = '';
-		// 	// 		btnDeny.onclick = function () { AIM.ws.request({ to: { client: wssdata.from.client }, state: 'deny' }); return false; };
-		// 	// 		btnAllow.onclick = function () { AIM.ws.request({ to: { client: wssdata.from.client }, state: 'allow' }); return false; };
-		// 	// 		break;
-		// 	// 	case 'waitforallow':
-		// 	//
-		// 	// 		break;
-		// 	//
-		// 	// 	case 'allow':
-		// 	// 		AIM.ws.request({ to: { client: this.data.from.client }, state: 'done' });
-		// 	// 		document.location.href = get.redirect_uri;
-		// 	// 		break;
-		// 	// 	case 'deny':
-		// 	// 		AIM.ws.request({ to: { client: this.data.from.client }, state: 'done' });
-		// 	// 		document.location.href = get.redirect_uri;
-		// 	// 		break;
-		// 	// 	case 'done':
-		// 	// 		document.location.reload();
-		// 	// 		break;
-		// 	// }
-		// },
 		load: function () {
 			if (window.screen.width > 600) document.body.style.backgroundImage = 'url("/shared/auth/i' + Math.round(new Date().getDay()/30 * 12) + '.jpg")';
 			// colpanel.onsubmit = function (event) {
@@ -735,22 +688,8 @@ AIM.extend({
 			AIM.id_token = AIM.cookie.id_token;
 			if (!get.prompt) return document.location.href='#?prompt=login'; //return AIM.request('?prompt=login');
 			if (get.prompt != 'consent' && AIM.cookie.id_token && get.response_type == 'code') return document.location.href='#?prompt=accept'; //AIM.request({query:{prompt:'accept'}});
+			AIM.emit('popstate');
 			// setInterval(function(){if (AIM.id_token != AIM.cookie.id_token) document.location.reload();},5000);
 		}
 	}
 });
-// if ('serviceWorker' in navigator) {
-// 	navigator.serviceWorker.register('/lib/js/sw.js', { scope: '/' })
-// 	.then(function(registration) {
-// 		console.log('Registration successful, scope is:', registration.scope);
-// 		return;
-// 		registration.pushManager.subscribe({userVisibleOnly: true}).then(function(sub) {
-// 			console.log('endpoint:', sub.endpoint);
-// 			registration.active.postMessage(JSON.stringify({uid: 13255, token: 2234523}));
-// 			console.log("Posted message");
-// 		});
-// 	})
-// 	.catch(function(error) {
-// 		console.log('Service worker registration failed, error:', error);
-// 	});
-// }
